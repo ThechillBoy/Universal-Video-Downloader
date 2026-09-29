@@ -45,8 +45,7 @@ for you. There is no build step, no database, and no account.
 | Progress updates | Server-Sent Events (SSE) |
 | Fonts | Google Fonts (Inter, Space Grotesk) |
 
-There is no `package.json`, no bundler and no `requirements.txt`. The only required
-Python package is `yt-dlp`.
+There is no `package.json` or bundler. Python dependencies are listed in `requirements.txt`.
 
 ---
 
