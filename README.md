@@ -26,8 +26,7 @@ for you. There is no build step, no database, and no account.
   video's real title as the filename.
 - **Friendly error messages** for common problems (private video, region-locked,
   needs login, missing ffmpeg, and so on).
-- **Local-only by design** — the server binds to `127.0.0.1` and files are written to a
-  temporary folder that is cleaned up after each download.
+- **Temporary-file design** — downloads are written to a temporary server folder and cleaned up after each download. When running locally, the app is available on your machine; when deployed, the same backend can serve the public web app.
 
 ---
 
@@ -61,6 +60,19 @@ Universal-Video-Downloader-/
 
 ---
 
+## Public deployment
+
+GitHub Pages can host the HTML/CSS/JS, but it cannot run `server.py`. For a single public URL where the frontend **and** Python backend run together, deploy this repository as a **Render Web Service**. The repository already includes `render.yaml` and `requirements.txt` for this setup.
+
+1. Open Render and create a **New → Web Service**.
+2. Connect `ThechillBoy/Universal-Video-Downloader`.
+3. Use the repository's `render.yaml` configuration (or set Build Command to `pip install -r requirements.txt` and Start Command to `python server.py`).
+4. Deploy and open the generated `*.onrender.com` URL.
+
+The service must listen on `0.0.0.0`; `server.py` is configured to do that when deployed. Render documents that public web services must bind to `0.0.0.0`. citeturn0search2
+
+> Free Render web services are intended for testing/hobby use, can spin down after 15 minutes of inactivity, and have an ephemeral filesystem. Large video downloads can also consume bandwidth quickly. citeturn0search0
+
 ## How to run it locally
 
 You need **Python 3** installed. These steps use Windows Command Prompt; the commands
@@ -69,7 +81,7 @@ are the same in PowerShell, with `python`/`py` available on your `PATH`.
 ### 1. Get the project
 
 ```bash
-git clone https://github.com/ThechillBoy/Universal-Video-Downloader-.git
+git clone https://github.com/ThechillBoy/Universal-Video-Downloader.git
 cd Universal-Video-Downloader-
 ```
 
