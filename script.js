@@ -34,7 +34,7 @@
   var ORIGIN =
     location.protocol === "http:" || location.protocol === "https:"
       ? location.origin
-      : null;
+      : "";
 
   var analyzing = false;
   var downloading = false;
@@ -82,10 +82,14 @@
     if (!/^https?:\/\//i.test(candidate)) candidate = "https://" + candidate;
     try {
       var parsed = new URL(candidate);
-      return parsed.hostname.indexOf(".") > 0;
+      return /^https?:$/i.test(parsed.protocol) && parsed.hostname.indexOf(".") > 0;
     } catch (e) {
       return false;
     }
+  }
+
+  function apiUrl(path) {
+    return ORIGIN + path;
   }
 
   function formatDuration(seconds) {
@@ -247,7 +251,7 @@
   async function runAnalysis() {
     setupAnalysis();
     try {
-      var res = await fetch(ORIGIN + "/api/analyze", {
+      var res = await fetch(apiUrl("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: urlInput.value })
@@ -307,7 +311,7 @@
     dlStatus.className = "status";
     displayedPercent = 0;
     try {
-      var res = await fetch(ORIGIN + "/api/download", {
+      var res = await fetch(apiUrl("/api/download", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: urlInput.value, quality: state.quality, format: state.format })
@@ -325,7 +329,7 @@
   function streamProgress(session) {
     state.session = session;
     closeStream();
-    eventSource = new EventSource(ORIGIN + "/api/events?session=" + session);
+    eventSource = new EventSource(apiUrl("/api/events?session=" + encodeURIComponent(session));
     eventSource.addEventListener("progress", function (e) {
       var d = JSON.parse(e.data);
       var p = d.percent || 0;
@@ -375,7 +379,7 @@
       "Download complete" + (note ? " — " + note : "") + ". " + (d.filename || "File saved.");
     dlStatus.className = "status is-ok";
     var link = document.createElement("a");
-    link.href = ORIGIN + "/api/file?session=" + state.session;
+    link.href = apiUrl("/api/file?session=" + encodeURIComponent(state.session));
     link.download = d.filename || "video";
     document.body.appendChild(link);
     link.click();
