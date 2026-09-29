@@ -13,7 +13,7 @@ import yt_dlp
 ROOT = os.path.dirname(os.path.abspath(__file__))
 WORKDIR = tempfile.mkdtemp(prefix="uvd-")
 PORT = int(os.environ.get("PORT", "8321"))
-HOST = "127.0.0.1"
+HOST = os.environ.get("HOST", "0.0.0.0")
 
 PUBLIC_DOMAINS = (
     "youtube.com",
