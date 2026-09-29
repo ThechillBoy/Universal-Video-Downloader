@@ -86,7 +86,7 @@ are the same in PowerShell, with `python`/`py` available on your `PATH`.
 
 ```bash
 git clone https://github.com/ThechillBoy/Universal-Video-Downloader.git
-cd Universal-Video-Downloader-
+cd Universal-Video-Downloader
 ```
 
 ### 2. (Recommended) Create a virtual environment
