@@ -3,6 +3,7 @@ import os
 import queue
 import re
 import tempfile
+import time
 import threading
 import urllib.parse
 import uuid
@@ -12,6 +13,7 @@ import yt_dlp
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 WORKDIR = tempfile.mkdtemp(prefix="uvd-")
+SESSION_TTL = int(os.environ.get("SESSION_TTL", "3600"))
 PORT = int(os.environ.get("PORT", "8321"))
 HOST = os.environ.get("HOST", "0.0.0.0")
 
@@ -132,8 +134,13 @@ def analyze(url):
         "no_warnings": True,
         "noplaylist": True,
         "skip_download": True,
-        "retries": 2,
-        "socket_timeout": 20,
+        "retries": 3,
+        "socket_timeout": 30,
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["android", "web"]
+            }
+        },
     }
     with yt_dlp.YoutubeDL(opts) as ydl:
         info = ydl.extract_info(url, download=False)
@@ -149,6 +156,22 @@ def analyze(url):
         "platform": PLATFORM_LABELS.get(extractor, extractor),
         "heights": heights[:12],
     }
+
+
+def cleanup_sessions():
+    now = time.time()
+    with sessions_lock:
+        stale = [
+            sid for sid, sess in sessions.items()
+            if sess.finished and (now - getattr(sess, "finished_at", now)) > SESSION_TTL
+        ]
+        for sid in stale:
+            sess = sessions.pop(sid, None)
+            if sess and sess.path:
+                try:
+                    os.remove(sess.path)
+                except OSError:
+                    pass
 
 
 def run_job(sess):
@@ -223,6 +246,7 @@ def run_job(sess):
                     height = f["height"]
                     break
         sess.finished = True
+        sess.finished_at = time.time()
         sess.q.put({"type": "done", "filename": sess.filename, "height": height, "ext": ext})
     except Exception as exc:
         for f in os.listdir(WORKDIR):
@@ -232,6 +256,7 @@ def run_job(sess):
                 except OSError:
                     pass
         sess.finished = True
+        sess.finished_at = time.time()
         sess.q.put({"type": "failed", "message": friendly_error(exc)})
 
 
@@ -304,6 +329,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def handle_analyze(self):
+        cleanup_sessions()
         data = self._read_json()
         try:
             url = normalize_url(data.get("url"))
@@ -315,6 +341,7 @@ class Handler(BaseHTTPRequestHandler):
             self._json(502, {"error": friendly_error(exc)})
 
     def handle_download(self):
+        cleanup_sessions()
         data = self._read_json()
         try:
             url = normalize_url(data.get("url"))
@@ -408,6 +435,8 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
+    global FFMPEG
+    FFMPEG = resolve_ffmpeg()
     server = ThreadingHTTPServer((HOST, PORT), Handler)
     server.daemon_threads = True
     print("Universal Video Downloader backend")
