@@ -251,7 +251,7 @@
   async function runAnalysis() {
     setupAnalysis();
     try {
-      var res = await fetch(apiUrl("/api/analyze", {
+      var res = await fetch(apiUrl("/api/analyze"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: urlInput.value })
@@ -311,7 +311,7 @@
     dlStatus.className = "status";
     displayedPercent = 0;
     try {
-      var res = await fetch(apiUrl("/api/download", {
+      var res = await fetch(apiUrl("/api/download"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: urlInput.value, quality: state.quality, format: state.format })
@@ -329,7 +329,7 @@
   function streamProgress(session) {
     state.session = session;
     closeStream();
-    eventSource = new EventSource(apiUrl("/api/events?session=" + encodeURIComponent(session));
+    eventSource = new EventSource(apiUrl("/api/events?session=" + encodeURIComponent(session)));
     eventSource.addEventListener("progress", function (e) {
       var d = JSON.parse(e.data);
       var p = d.percent || 0;
