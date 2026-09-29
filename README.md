@@ -10,6 +10,10 @@ for you. There is no build step, no database, and no account.
 
 ---
 
+## UI Preview
+
+![Universal Video Downloader UI](git-image.png)
+
 ## Features
 
 - **Paste a link and go** — one input box, one *Analyze* button, one *Download* button.
