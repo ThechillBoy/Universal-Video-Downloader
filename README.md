@@ -106,17 +106,10 @@ You should see `(.venv)` at the start of your prompt.
 
 ```bash
 python -m pip install --upgrade pip
-pip install yt-dlp
+python -m pip install -r requirements.txt
 ```
 
-Optional but recommended — supplies `ffmpeg` automatically so high-quality video
-streams can be merged and MP3 files can be extracted:
-
-```bash
-pip install imageio-ffmpeg
-```
-
-> If you already have `ffmpeg` installed on your `PATH`, you can skip this.
+The `requirements.txt` file installs both `yt-dlp` and `imageio-ffmpeg`. The latter provides an FFmpeg binary when a system FFmpeg is not already available on your `PATH`.
 
 ### 4. Start the server
 
